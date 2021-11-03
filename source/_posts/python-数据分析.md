@@ -49,7 +49,10 @@ df.to_excel('./data/分行业CGIT.xlsx')
 
 核心代码只需一行：
 
-`data.groupby(['Year', 'Sector']).sum().unstack(-1, 0)`
+```python
+data.groupby(['Year', 'Sector']).sum().unstack(-1, 0)
+
+```
 
 便可实现我们需要的结果，即将3444条数据按年份、行业分类加总（如下图所示）。是不是看着单词就明白什么意思了？这条指令告诉计算机去处理“data”对象，先依据“Year”和“Sector”进行“groupby”即分组处理，再“sum”分组加总后，最后“unstack”展开。
 
@@ -112,7 +115,7 @@ data.to_excel(filename) # 将结果保存至excel
 
 事实上，越是有规律且重复次数越多的数据获取或数据操作的工作，越适合用python来处理。比如，查询城市的经纬度，可以通过Google Earth 人工一个个地查询，如下图所示查询西安市的经纬度：
 
-![google earth](https://image.xiuwujinda.cn/2020/12/01/google earth.png)
+![google earth](https://image.xiuwujinda.cn/2020/12/01/google-earth.png)
 
 但当查询城市数量是1000个时，人工查询是极其枯燥且浪费时间的，而通过python程序，只需要将一次查询的步骤用程序来表示，剩下的999次，通过循环，程序自己便可以完成。核心代码如下：
 
