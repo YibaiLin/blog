@@ -51,7 +51,6 @@ df.to_excel('./data/分行业CGIT.xlsx')
 
 ```python
 data.groupby(['Year', 'Sector']).sum().unstack(-1, 0)
-
 ```
 
 便可实现我们需要的结果，即将3444条数据按年份、行业分类加总（如下图所示）。是不是看着单词就明白什么意思了？这条指令告诉计算机去处理“data”对象，先依据“Year”和“Sector”进行“groupby”即分组处理，再“sum”分组加总后，最后“unstack”展开。
