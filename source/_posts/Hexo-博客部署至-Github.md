@@ -1,5 +1,13 @@
-# Hexo 部署博客至 Github
+---
+title: Hexo 博客部署至 Github
+date: 2021-11-05 19:19:04
+categories: 
+- [Node.js]
+tags: [Hexo]
+---
 [Hexo](https://hexo.io/zh-cn/docs/#%E5%AE%89%E8%A3%85) 是一个容易上手的**博客框架**。我们使用 Markdown 写博文，Hexo 负责将文档渲染成网页(Hexo 使用 Markdown 渲染引擎来完成这项工作)，于是我们便有了一个静态博客网站，接着我们可以将这个静态网站部署到 Github 仓库，并利用 Github Page 非常方便的将这个网站在 Github 的服务器上部署上线，至此，我们便可以在浏览器中访问我们写的博客了。 
+
+<!--more-->
 
 #### 1.安装 Hexo
 
@@ -27,7 +35,7 @@ hexo s # hexo server 的缩写
 
 访问 `localhost:4000` 即可看到初始页面，默认主题为 landscrape：
 
-![hexo init page](C:\Users\linyibai\Pictures\七牛云\hexo-init.png)
+![hexo init page](https://image.xiuwujinda.cn//2021/11/05/hexo-init.png)
 
 在 `/_config.yml` 配置站点名称、作者等信息：
 
@@ -76,7 +84,7 @@ hexo s
 
 可以看到 Next 主题已经生效：
 
-![hexo-theme-next](C:\Users\linyibai\Pictures\七牛云\hexo-theme-next.png)
+![hexo-theme-next](https://image.xiuwujinda.cn//2021/11/05/hexo-theme-next.png)
 
 ##### 3.3 配置 Next 主题
 
@@ -208,6 +216,3 @@ hexo new page tags # 生成标签页面
 
 hexo new page custom # 生成任意页面，在 source 目录下编辑对应的 custom.md 的内容
 ```
-
-
-
