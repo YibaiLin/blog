@@ -27,7 +27,7 @@ hexo s # hexo server 的缩写
 
 访问 `localhost:4000` 即可看到初始页面，默认主题为 landscrape：
 
-![hexo init page](C:\Users\linyibai\Pictures\七牛云\hexo-init.png)
+![hexo init page](https://image.xiuwujinda.cn//2021/11/05/hexo-init.png)
 
 在 `/_config.yml` 配置站点名称、作者等信息：
 
@@ -76,7 +76,7 @@ hexo s
 
 可以看到 Next 主题已经生效：
 
-![hexo-theme-next](C:\Users\linyibai\Pictures\七牛云\hexo-theme-next.png)
+![hexo-theme-next](https://image.xiuwujinda.cn//2021/11/05/hexo-theme-next.png)
 
 ##### 3.3 配置 Next 主题
 
