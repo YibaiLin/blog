@@ -521,12 +521,16 @@ apt-get install nginx
 
 [基本概念](https://nginx.org/en/docs/beginners_guide.html)
 
-##### 8.2 配置
+##### 8.2 配置文件
+
+参考：[Deploy Next.js App With Nginx, Let's Encrypt and PM2](https://jasonvan.ca/posts/deploy-next-js-app-with-nginx-let-s-encrypt-and-pm2)
+
+​			[如何部署Next.js应用到Ubuntu服务器？](https://blog.byetool.com/2021/05/13/%E5%A6%82%E4%BD%95%E9%83%A8%E7%BD%B2Next.js%E5%BA%94%E7%94%A8%E5%88%B0Ubuntu%E6%9C%8D%E5%8A%A1%E5%99%A8%EF%BC%9F/)
 
 ###### 8.2.1 新建配置文件
 
 ```shell
-sudo vim /etc/nginx/sites-available/sample.domain
+sudo vim /etc/nginx/sites-available/example.com
 ```
 
 ###### 8.2.2 添加硬链接
@@ -534,7 +538,7 @@ sudo vim /etc/nginx/sites-available/sample.domain
 通过绝对路径添加硬链接至 `/etc/nginx/sites-enabled/`目录：
 
 ```shell
-sudo ln -s /etc/nginx/sites-available/linyibai.space /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/example.com /etc/nginx/sites-enabled/
 ```
 
 使配置文件在两个目录下保持同步更新，之后只更新 `sites-available`下的文件即可，注意使用绝对路径，否则会生成空文件
@@ -551,11 +555,11 @@ sudo ln -s /etc/nginx/sites-available/linyibai.space /etc/nginx/sites-enabled/
 
    ```shell
    sudo service nginx restart
+   # 或者
+   sudo systemctl reload nginx
    ```
 
-##### 8.3 配置文件内容
-
-###### 8.3.1 添加域名前，只通过IP访问时
+##### 8.3 设置通过域名访问
 
 ```nginx
 server {
@@ -575,3 +579,115 @@ server {
 }
 ```
 
+##### 8.4 配置HTTPS访问
+
+参考：[How To Secure Nginx with Let's Encrypt on Ubuntu 20.04](https://www.digitalocean.com/community/tutorials/how-to-secure-nginx-with-let-s-encrypt-on-ubuntu-20-04)
+
+###### 8.4.1 安装 `Certbot` 和对应的 `Nginx` 插件：
+
+```shell
+sudo apt install certbot python3-certbot-nginx
+```
+
+###### 8.4.2 申请证书
+
+```shell
+sudo certbot --nginx -d example.com -d www.example.com
+```
+
+按提示输入邮箱、同意服务条款、选择强制跳转至 HTTPS
+
+###### 8.4.3 确定自动更新证书
+
+Let’s Encrypt 证书申请一次有效期是90天。Certbot 提供了自动更新证书的脚本，默认每天查询两次，并在证书到期前30天内更新证书。
+
+1. 查看自动更新程序的运行状态
+
+   ```shell
+   sudo systemctl status certbot.timer
+   ```
+
+   ```shell
+   Output
+   ● certbot.timer - Run certbot twice daily
+        Loaded: loaded (/lib/systemd/system/certbot.timer; enabled; vendor preset: enabled)
+        Active: active (waiting) since Mon 2020-05-04 20:04:36 UTC; 2 weeks 1 days ago
+       Trigger: Thu 2020-05-21 05:22:32 UTC; 9h left
+      Triggers: ● certbot.service
+   ```
+
+2. 进一步通过验证：
+
+   ```shell
+   sudo certbot renew --dry-run
+   ```
+
+   执行无报错，即说明自动更新证书服务运行正确。
+
+###### 8.4.4 最终配置
+
+安装证书后， Certbot 自动添加https相关配置，此外，我添加了额外的跳转指令，将来自 `www.example.com` 的访问重定向至 `example.com`。完整配置如下：
+
+```nginx
+server {
+
+    server_name example.com www.example.com;
+	
+    # 使 www.example.com 跳转至 example.com
+    if ($host = www.example.com) {
+      return 301 https://example.com$request_uri;
+    }
+
+    # gzip 相关配置
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1k;
+    gzip_types text/plain application/xml text/css application/javascript;
+
+    # 代理到 Next.js 程序
+    location / {
+      proxy_pass http://127.0.0.1:3000;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection 'upgrade';
+      proxy_set_header Host $host;
+      proxy_cache_bypass $http_upgrade;
+    }
+    
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/example.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/example.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+    }
+    server {
+    if ($host = www.example.com) {
+        return 301 https://example.com$request_uri;
+    } # managed by Certbot
+
+
+    if ($host = example.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    listen [::]:80;
+
+    server_name example.com www.example.com;
+ 	return 404; # managed by Certbot
+
+}
+```
+
+重启 `Nginx` 后便可通过 `https` 访问域名。
+
+##### 8.5  关于 `/_next/static` 无法访问的问题
+
+> "If the app works fine when you run `next build` and `next start` on your local machine, then it should work on the live server as well without making any extra changes to Next.js code."
+
+一般情况下，如果本地运行正常，服务器的生产环境中运行也应该正常，不需要改变 next.js 的默认设置。
+
+要注意检查是否所引用文件不存在。
